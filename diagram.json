@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "author": "Aravindhan S",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-slide-switch", "id": "sw_ble", "top": -30, "left": -170, "attrs": { "label": "Helmet detected (BLE)" } },
+    { "type": "wokwi-slide-switch", "id": "sw_worn", "top": 30, "left": -170, "attrs": { "label": "Helmet worn" } },
+    { "type": "wokwi-pushbutton", "id": "btn_ign", "top": 95, "left": -170, "attrs": { "color": "green", "label": "IGNITION" } },
+    { "type": "wokwi-led", "id": "led_red", "top": 170, "left": -170, "attrs": { "color": "red", "label": "WARNING" } },
+    { "type": "wokwi-led", "id": "led_green", "top": 230, "left": -170, "attrs": { "color": "green", "label": "SAFE" } },
+    { "type": "wokwi-led", "id": "led_permit", "top": 290, "left": -170, "attrs": { "color": "blue", "label": "PERMIT" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": 180, "left": -110, "attrs": { "value": "220" } },
+    { "type": "wokwi-resistor", "id": "r2", "top": 240, "left": -110, "attrs": { "value": "220" } },
+    { "type": "wokwi-resistor", "id": "r3", "top": 300, "left": -110, "attrs": { "value": "220" } },
+    { "type": "wokwi-buzzer", "id": "bz1", "top": 350, "left": -170, "attrs": { "volume": "0.1" } }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+
+    [ "esp:D25", "sw_ble:2", "orange", [] ],
+    [ "sw_ble:3", "esp:GND.2", "black", [] ],
+
+    [ "esp:D26", "sw_worn:2", "yellow", [] ],
+    [ "sw_worn:3", "esp:GND.2", "black", [] ],
+
+    [ "esp:D27", "btn_ign:1.l", "green", [] ],
+    [ "btn_ign:2.l", "esp:GND.2", "black", [] ],
+
+    [ "esp:D14", "r1:2", "red", [] ],
+    [ "r1:1", "led_red:A", "red", [] ],
+    [ "led_red:C", "esp:GND.2", "black", [] ],
+
+    [ "esp:D33", "r2:2", "green", [] ],
+    [ "r2:1", "led_green:A", "green", [] ],
+    [ "led_green:C", "esp:GND.2", "black", [] ],
+
+    [ "esp:D32", "r3:2", "blue", [] ],
+    [ "r3:1", "led_permit:A", "blue", [] ],
+    [ "led_permit:C", "esp:GND.2", "black", [] ],
+
+    [ "esp:D13", "bz1:2", "purple", [] ],
+    [ "bz1:1", "esp:GND.2", "black", [] ]
+  ],
+  "dependencies": {}
+}
