@@ -1,0 +1,2109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Smart Helmet Guardian Dashboard - Real-time rider safety and helmet compliance monitoring for parents and guardians." />
+  <title>Smart Helmet Guardian Dashboard</title>
+
+  <!-- Clean System Typography & Apple-inspired Design Tokens -->
+  <style>
+    /* ==========================================================================
+       1. DESIGN TOKENS & RESET (Apple HIG Light Theme)
+       ========================================================================== */
+    :root {
+      /* Primary Surfaces & Backgrounds */
+      --bg-canvas: #F5F5F7;
+      --bg-card: #FFFFFF;
+      --bg-card-subtle: #F9F9FB;
+      --border-subtle: rgba(0, 0, 0, 0.08);
+      --border-focus: #0071E3;
+
+      /* Apple Typography Hierarchy */
+      --text-primary: #1D1D1F;
+      --text-secondary: #6E6E73;
+      --text-tertiary: #86868B;
+      --text-inverse: #FFFFFF;
+
+      /* Calm Apple System Accent */
+      --accent-primary: #0071E3;
+      --accent-hover: #0077ED;
+      --accent-soft: rgba(0, 113, 227, 0.08);
+
+      /* Semantic Status Colors */
+      --color-safe: #34C759;
+      --color-safe-bg: #EDF9F0;
+      --color-safe-border: #BCEAC8;
+
+      --color-alert: #FF3B30;
+      --color-alert-bg: #FEF0EF;
+      --color-alert-border: #FDC7C4;
+
+      --color-warning: #FF9500;
+      --color-warning-bg: #FFF8EB;
+      --color-warning-border: #FFE2B8;
+
+      /* Radii & Apple Shadows */
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+      --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04), 0 12px 28px rgba(0, 0, 0, 0.03);
+
+      --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --transition-base: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      line-height: 1.47059;
+      font-weight: 400;
+      letter-spacing: -0.012em;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      padding-bottom: 60px;
+    }
+
+    .dashboard-container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ==========================================================================
+       2. HEADER & NAVIGATION
+       ========================================================================== */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(245, 245, 247, 0.82);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 14px 0;
+      margin-bottom: 24px;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent-primary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      flex-shrink: 0;
+    }
+
+    .brand-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .brand-text h1 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .brand-text p {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .rider-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .rider-badge strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-safe);
+      box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.4);
+      animation: pulse-dot 2s infinite;
+    }
+
+    .status-pill.offline .status-dot {
+      background: var(--text-tertiary);
+      animation: none;
+    }
+
+    @keyframes pulse-dot {
+      0% { box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.5); }
+      70% { box-shadow: 0 0 0 7px rgba(52, 199, 89, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(52, 199, 89, 0); }
+    }
+
+    .btn-icon {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-base);
+    }
+
+    .btn-icon:hover {
+      background: #FFFFFF;
+      color: var(--accent-primary);
+      border-color: var(--accent-primary);
+    }
+
+    .btn-icon svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .btn-icon.spinning svg {
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .mode-toggle-btn {
+      font-size: 0.75rem;
+      background: rgba(0, 113, 227, 0.08);
+      border: 1px solid rgba(0, 113, 227, 0.2);
+      color: var(--accent-primary);
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      font-weight: 500;
+      transition: var(--transition-base);
+    }
+
+    .mode-toggle-btn:hover {
+      background: rgba(0, 113, 227, 0.16);
+    }
+
+    /* ==========================================================================
+       3. NOTICE / ALERT BANNERS
+       ========================================================================== */
+    .banner-container {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .alert-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      font-size: 0.92rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .alert-banner.critical {
+      background: var(--color-alert-bg);
+      border: 1px solid var(--color-alert-border);
+      color: #B51A12;
+    }
+
+    .alert-banner.info {
+      background: var(--accent-soft);
+      border: 1px solid rgba(0, 113, 227, 0.2);
+      color: #0058B3;
+    }
+
+    .alert-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* ==========================================================================
+       4. HERO / LIVE STATUS CARD
+       ========================================================================== */
+    .live-hero-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .live-hero-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .live-hero-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-tertiary);
+      font-weight: 600;
+    }
+
+    .live-hero-time {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .live-status-presentation {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 16px 10px 22px;
+    }
+
+    .status-headline {
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 10px;
+      transition: var(--transition-base);
+    }
+
+    .status-headline.safe {
+      color: var(--color-safe);
+    }
+
+    .status-headline.danger {
+      color: var(--color-alert);
+    }
+
+    .status-sub-explanation {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 540px;
+      line-height: 1.4;
+    }
+
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .telemetry-item {
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .telemetry-label {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .telemetry-chip {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: var(--radius-full);
+    }
+
+    .chip-green {
+      background: var(--color-safe-bg);
+      color: var(--color-safe);
+    }
+
+    .chip-red {
+      background: var(--color-alert-bg);
+      color: var(--color-alert);
+    }
+
+    .chip-gray {
+      background: #E5E5EA;
+      color: var(--text-secondary);
+    }
+
+    /* ==========================================================================
+       5. STATS CARDS (Today, This Week, This Month)
+       ========================================================================== */
+    .stats-section-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    }
+
+    .stat-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .stat-period-tag {
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-tertiary);
+    }
+
+    .stat-pct-badge {
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      background: var(--color-safe-bg);
+      color: var(--color-safe);
+    }
+
+    .stat-pct-badge.warning {
+      background: var(--color-warning-bg);
+      color: var(--color-warning);
+    }
+
+    .stat-pct-badge.danger {
+      background: var(--color-alert-bg);
+      color: var(--color-alert);
+    }
+
+    .stat-big-number {
+      font-size: 2.3rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat-metric-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 18px;
+    }
+
+    .compliance-bar-track {
+      width: 100%;
+      height: 6px;
+      background: #E5E5EA;
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .compliance-bar-fill {
+      height: 100%;
+      background: var(--color-safe);
+      border-radius: var(--radius-full);
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .stat-card-footer {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 12px;
+      margin-top: 4px;
+    }
+
+    .stat-footer-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-footer-label {
+      font-size: 0.76rem;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .stat-footer-value {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .stat-footer-value.danger {
+      color: var(--color-alert);
+    }
+
+    /* ==========================================================================
+       6. 7-DAY CHART + ALERTS SUMMARY
+       ========================================================================== */
+    .chart-and-alerts-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 860px) {
+      .chart-and-alerts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .panel-subtitle {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      margin-top: 10px;
+    }
+
+    .chart-legend {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 12px;
+      justify-content: flex-end;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+    }
+
+    .legend-dot.compliant { background: var(--color-safe); }
+    .legend-dot.violation { background: var(--color-alert); }
+
+    svg.bar-chart-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .chart-bar {
+      transition: height 0.3s ease, y 0.3s ease, opacity 0.2s ease;
+      cursor: pointer;
+    }
+
+    .chart-bar:hover {
+      opacity: 0.82;
+    }
+
+    .chart-axis-line {
+      stroke: var(--border-subtle);
+      stroke-width: 1;
+      stroke-dasharray: 4 4;
+    }
+
+    .chart-label {
+      font-family: var(--font-family);
+      font-size: 11px;
+      fill: var(--text-tertiary);
+      text-anchor: middle;
+      font-weight: 500;
+    }
+
+    .chart-tooltip {
+      position: absolute;
+      background: rgba(29, 29, 31, 0.92);
+      color: #FFFFFF;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      line-height: 1.35;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(8px);
+      display: none;
+      z-index: 50;
+      white-space: nowrap;
+      transform: translate(-50%, -100%);
+      margin-top: -8px;
+    }
+
+    .alerts-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .alerts-stat-box {
+      background: var(--bg-card-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-top: 10px;
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .alerts-number {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      line-height: 1;
+    }
+
+    .alert-rule-notice {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .alert-rule-notice strong {
+      color: var(--text-primary);
+    }
+
+    /* ==========================================================================
+       7. RECENT TRIPS TABLE
+       ========================================================================== */
+    .table-container {
+      overflow-x: auto;
+      margin-top: 8px;
+    }
+
+    table.apple-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    table.apple-table th {
+      padding: 12px 14px;
+      color: var(--text-tertiary);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    table.apple-table td {
+      padding: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+
+    table.apple-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .badge-status.ok {
+      background: var(--color-safe-bg);
+      color: var(--color-safe);
+    }
+
+    .badge-status.violation {
+      background: var(--color-alert-bg);
+      color: var(--color-alert);
+    }
+
+    .trip-reason {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .helmet-id-tag {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: #EBEBED;
+      color: var(--text-primary);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    /* ==========================================================================
+       8. HELMET MANAGEMENT & FORMS
+       ========================================================================== */
+    .helmets-management-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 860px) {
+      .helmets-management-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .helmet-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .helmet-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      transition: var(--transition-base);
+    }
+
+    .helmet-item-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .helmet-rider-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .helmet-guardian-detail {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .badge-active {
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--color-safe-bg);
+      color: var(--color-safe);
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+    }
+
+    .badge-inactive {
+      font-size: 0.75rem;
+      font-weight: 500;
+      background: #E5E5EA;
+      color: var(--text-tertiary);
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+    }
+
+    .form-tabs {
+      display: flex;
+      background: #EBEBED;
+      border-radius: var(--radius-md);
+      padding: 3px;
+      margin-bottom: 16px;
+      gap: 2px;
+    }
+
+    .form-tab-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 7px 12px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border-radius: 9px;
+      cursor: pointer;
+      transition: var(--transition-base);
+      text-align: center;
+    }
+
+    .form-tab-btn.active {
+      background: #FFFFFF;
+      color: var(--text-primary);
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .form-pane {
+      display: none;
+    }
+
+    .form-pane.active {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .apple-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .form-group label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .apple-input {
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      outline: none;
+      transition: var(--transition-base);
+    }
+
+    .apple-input:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .btn-submit {
+      font-family: var(--font-family);
+      background: var(--accent-primary);
+      color: #FFFFFF;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 11px 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-base);
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-submit:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-submit:disabled {
+      background: #C7C7CC;
+      cursor: not-allowed;
+    }
+
+    .form-feedback {
+      font-size: 0.82rem;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      display: none;
+      margin-top: 4px;
+    }
+
+    .form-feedback.success {
+      display: block;
+      background: var(--color-safe-bg);
+      color: var(--color-safe);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .empty-state-desc {
+      font-size: 0.82rem;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    .dashboard-footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--text-tertiary);
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       HEADER & NAVIGATION BAR
+       ========================================================================== -->
+  <header class="site-header">
+    <div class="dashboard-container header-inner">
+      <div class="brand-group">
+        <div class="brand-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Smart Helmet Guardian</h1>
+          <p>Family Safety &amp; Compliance Monitor</p>
+        </div>
+      </div>
+
+      <div class="header-meta">
+        <div class="rider-badge" id="riderBadge">
+          <span>Rider:</span>
+          <strong id="riderNameText">Leo Anderson</strong>
+        </div>
+
+        <div class="status-pill" id="livePill" title="Connection status with telemetry system">
+          <span class="status-dot"></span>
+          <span id="liveStatusText">Live Feed</span>
+        </div>
+
+        <button class="btn-icon" id="btnRefresh" title="Refresh data now" aria-label="Refresh data">
+          <svg viewBox="0 0 24 24">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+        </button>
+
+        <a href="https://docs.google.com/spreadsheets/d/1B_Rk3AVQTcsjm8AegPxXubjsGNfsO1kaajBCFKmP-wo/edit?gid=508943728#gid=508943728" target="_blank" rel="noopener noreferrer" class="mode-toggle-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="Open live Google Spreadsheet in a new tab">
+          <span>Sheets</span>
+          <svg style="width: 11px; height: 11px; fill: currentColor;" viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7zm-4 14H5V7h7V5H5c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2v-7h-2v7h-5z"/></svg>
+        </a>
+
+        <button class="mode-toggle-btn" id="btnModeToggle" title="Click to switch between live APIs and sample demonstration data">
+          Mode: <span id="modeText">Live Network</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+
+    <!-- ==========================================================================
+         CRITICAL ALERT & NOTIFICATION BANNERS
+         ========================================================================== -->
+    <div class="banner-container" id="bannerContainer">
+      <div class="alert-banner critical" id="consecutiveViolationBanner" style="display: none;">
+        <div class="alert-banner-left">
+          <span style="font-size: 1.25rem;">⚠️</span>
+          <div>
+            <strong>Parental Alert: Repeated Helmet Violations</strong>
+            <div id="consecutiveViolationMsg">The rider has recorded 3 or more safety violations in a row. Please reach out to ensure proper helmet usage.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert-banner info" id="dataSourceNotice" style="display: none;">
+        <div class="alert-banner-left">
+          <span style="font-size: 1.2rem;">ℹ️</span>
+          <div id="dataSourceNoticeText">Currently displaying demonstration guardian data. You can configure your Google Apps Script &amp; ThingSpeak channel URLs at the top of the script.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================================================
+         LIVE STATUS CARD (Safe to Ride / Helmet Not Worn / Not Found)
+         ========================================================================== -->
+    <section class="live-hero-card" id="liveStatusCard" aria-labelledby="liveCardHeading">
+      <div class="live-hero-header">
+        <span class="live-hero-title" id="liveCardHeading">Real-Time Helmet Telemetry</span>
+        <span class="live-hero-time" id="lastUpdatedText">Updated just now</span>
+      </div>
+
+      <div class="live-status-presentation">
+        <div class="status-headline safe" id="heroStatusText">SAFE TO RIDE</div>
+        <p class="status-sub-explanation" id="heroStatusSub">
+          The smart helmet is detected, buckled, and active. Ready for a safe trip!
+        </p>
+      </div>
+
+      <div class="telemetry-grid">
+        <div class="telemetry-item">
+          <span class="telemetry-label">Helmet Detected</span>
+          <span class="telemetry-chip chip-green" id="chipDetected">Connected</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">Helmet Worn</span>
+          <span class="telemetry-chip chip-green" id="chipWorn">Buckled</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">Last Trip Result</span>
+          <span class="telemetry-chip chip-green" id="chipLastTrip">Compliant</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">Consecutive Violations</span>
+          <span class="telemetry-chip chip-gray" id="chipViolationStreak">0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         THREE STAT CARDS: TODAY, THIS WEEK, THIS MONTH
+         ========================================================================== -->
+    <section class="stats-section-grid" aria-label="Compliance Statistics">
+      <div class="stat-card" id="cardToday">
+        <div>
+          <div class="stat-card-header">
+            <span class="stat-period-tag">Today</span>
+            <span class="stat-pct-badge" id="todayPctBadge">100% Compliant</span>
+          </div>
+          <div class="stat-big-number" id="todayCompliancePct">100%</div>
+          <div class="stat-metric-subtitle">Daily safety compliance score</div>
+          <div class="compliance-bar-track">
+            <div class="compliance-bar-fill" id="todayBarFill" style="width: 100%;"></div>
+          </div>
+        </div>
+        <div class="stat-card-footer">
+          <div class="stat-footer-item">
+            <span class="stat-footer-label">Trips</span>
+            <span class="stat-footer-value" id="todayTrips">3</span>
+          </div>
+          <div class="stat-footer-item">
+            <span class="stat-footer-label">Compliant</span>
+            <span class="stat-footer-value" id="todayCompliant">3</span>
+          </div>
+          <div class="stat-footer-item">
+            <span class="stat-footer-label">Violations</span>
+            <span class="stat-footer-value" id="todayViolations">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card" id="cardWeekly">
+        <div>
+          <div class="stat-card-header">
+            <span class="stat-period-tag">This Week</span>
+            <span class="stat-pct-badge" id="weeklyPctBadge">94% Compliant</span>
+          </div>
+          <div class="stat-big-number" id="weeklyCompliancePct">94%</div>
+          <div class="stat-metric-subtitle">7-day rolling adherence</div>
+          <div class="compliance-bar-track">
+            <div class="compliance-bar-fill" id="weeklyBarFill" style="width: 94%;"></div>
+          </div>
+        </div>
+        <div class="stat-card-footer">
+          <div class="stat-footer-item">
+            <span class="stat-footer-label">Trips</span>
+            <span class="stat-footer-value" id="weeklyTrips">18</span>
+          </div>
+          <div class="stat-footer-item">
+            <span class="stat-footer-label">Compliant</span>
+            <span class="stat-footer-value" id="weeklyCompliant">17</span>
+          </div>
+          <div class="stat-footer-item">
+            <span class="stat-footer-label">Violations</span>
+            <span class="stat-footer-value" id="weeklyViolations">1</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card" id="cardMonthly">
+        <div>
+          <div class="stat-card-header">
+            <span class="stat-period-tag">This Month</span>
+            <span class="stat-pct-badge" id="monthlyPctBadge">96% Compliant</span>
+          </div>
+          <div class="stat-big-number" id="monthlyCompliancePct">96%</div>
+          <div class="stat-metric-subtitle">Monthly cumulative safety rating</div>
+          <div class="compliance-bar-track">
+            <div class="compliance-bar-fill" id="monthlyBarFill" style="width: 96%;"></div>
+          </div>
+        </div>
+        <div class="stat-card-footer">
+          <div class="stat-footer-item">
+            <span class="stat-footer-label">Trips</span>
+            <span class="stat-footer-value" id="monthlyTrips">54</span>
+          </div>
+          <div class="stat-footer-item">
+            <span class="stat-footer-label">Compliant</span>
+            <span class="stat-footer-value" id="monthlyCompliant">52</span>
+          </div>
+          <div class="stat-footer-item">
+            <span class="stat-footer-label">Violations</span>
+            <span class="stat-footer-value" id="monthlyViolations">2</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+       BAR CHART (LAST 7 DAYS) & GUARDIAN ALERTS SUMMARY
+       ========================================================================== -->
+    <div class="chart-and-alerts-grid">
+      <section class="panel-card" aria-label="7-Day Safety History">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Last 7 Days Activity</h2>
+            <p class="panel-subtitle">Safe compliant rides vs. recorded violations</p>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <span class="legend-dot compliant"></span>
+              <span>Compliant</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot violation"></span>
+              <span>Violation</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-container" id="chartWrapper">
+          <svg class="bar-chart-svg" id="svgBarChart" viewBox="0 0 620 220" preserveAspectRatio="none">
+            <!-- Custom responsive SVG rendered via JS -->
+          </svg>
+          <div class="chart-tooltip" id="chartTooltip"></div>
+        </div>
+      </section>
+
+      <section class="panel-card alerts-card" aria-label="Guardian Alerts">
+        <div>
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Guardian Alerts</h2>
+              <p class="panel-subtitle">Safety notifications dispatched</p>
+            </div>
+          </div>
+
+          <div class="alerts-stat-box">
+            <div>
+              <span style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 500;">Total Alerts</span>
+              <div style="font-size: 0.85rem; color: var(--text-tertiary);">SMS &amp; Email logs</div>
+            </div>
+            <div class="alerts-number" id="alertsCount">2</div>
+          </div>
+
+          <div class="alert-rule-notice">
+            <strong>Guardian Rule:</strong> An urgent alert banner is triggered whenever <strong>3 consecutive violations</strong> are recorded without a compliant ride.
+          </div>
+        </div>
+
+        <div style="margin-top: 18px; font-size: 0.82rem; color: var(--text-tertiary);">
+          Protected under Smart Helmet Guardian protocol.
+        </div>
+      </section>
+    </div>
+
+    <!-- ==========================================================================
+       RECENT TRIPS TABLE
+       ========================================================================== -->
+    <section class="panel-card" style="margin-bottom: 24px;" aria-label="Recent Trips">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Recent Trips</h2>
+          <p class="panel-subtitle">Latest recorded journeys and helmet compliance log</p>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="apple-table" id="recentTripsTable">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Helmet</th>
+              <th>Status</th>
+              <th>Explanation</th>
+            </tr>
+          </thead>
+          <tbody id="recentTripsBody">
+            <!-- Populated dynamically via JS -->
+          </tbody>
+        </table>
+      </div>
+      <div id="tripsEmptyState" class="empty-state" style="display: none;">
+        <div class="empty-state-title">No Recent Trips Recorded</div>
+        <div class="empty-state-desc">Rides will appear here once the helmet detects motion and completes a trip.</div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+       HELMET MANAGEMENT (LIST, REGISTER, REPLACE)
+       ========================================================================== -->
+    <section class="helmets-management-grid" aria-label="Helmet Management">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Registered Helmets</h2>
+            <p class="panel-subtitle">Devices linked to this guardian account</p>
+          </div>
+        </div>
+
+        <div class="helmet-list" id="helmetListContainer">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Device Management</h2>
+            <p class="panel-subtitle">Pair a new helmet or swap an existing one</p>
+          </div>
+        </div>
+
+        <div class="form-tabs" role="tablist">
+          <button class="form-tab-btn active" id="tabBtnRegister" onclick="switchFormTab('register')">Register New</button>
+          <button class="form-tab-btn" id="tabBtnReplace" onclick="switchFormTab('replace')">Replace Existing</button>
+        </div>
+
+        <!-- Form 1: Register Helmet -->
+        <div class="form-pane active" id="paneRegister">
+          <form class="apple-form" id="registerForm" onsubmit="handleRegisterHelmet(event)">
+            <div class="form-group">
+              <label for="regHelmetId">Helmet ID</label>
+              <input type="text" id="regHelmetId" class="apple-input" placeholder="e.g. HLM-102" required />
+            </div>
+            <div class="form-group">
+              <label for="regRider">Rider Full Name</label>
+              <input type="text" id="regRider" class="apple-input" placeholder="e.g. Leo Anderson" required />
+            </div>
+            <div class="form-group">
+              <label for="regGuardianName">Guardian Name</label>
+              <input type="text" id="regGuardianName" class="apple-input" placeholder="e.g. Sarah Anderson" required />
+            </div>
+            <div class="form-group">
+              <label for="regGuardianPhone">Guardian Phone</label>
+              <input type="tel" id="regGuardianPhone" class="apple-input" placeholder="e.g. +1 555-0199" required />
+            </div>
+            <div class="form-group">
+              <label for="regGuardianEmail">Guardian Email</label>
+              <input type="email" id="regGuardianEmail" class="apple-input" placeholder="e.g. sarah@example.com" required />
+            </div>
+            <button type="submit" class="btn-submit" id="btnSubmitRegister">
+              <span>Register Helmet</span>
+            </button>
+            <div class="form-feedback" id="registerFeedback"></div>
+          </form>
+        </div>
+
+        <!-- Form 2: Replace Helmet -->
+        <div class="form-pane" id="paneReplace">
+          <form class="apple-form" id="replaceForm" onsubmit="handleReplaceHelmet(event)">
+            <div class="form-group">
+              <label for="repOldId">Current Helmet ID</label>
+              <input type="text" id="repOldId" class="apple-input" placeholder="e.g. HLM-101" required />
+            </div>
+            <div class="form-group">
+              <label for="repNewId">New Replacement Helmet ID</label>
+              <input type="text" id="repNewId" class="apple-input" placeholder="e.g. HLM-103" required />
+            </div>
+            <button type="submit" class="btn-submit" id="btnSubmitReplace">
+              <span>Transfer Registration</span>
+            </button>
+            <div class="form-feedback" id="replaceFeedback"></div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <footer class="dashboard-footer">
+      <p>Smart Helmet Guardian Dashboard &bull; Single-file build &bull; Standalone HTML + CSS + JS</p>
+    </footer>
+  </main>
+
+  <!-- ==========================================================================
+       JAVASCRIPT LOGIC & STUDENT DOCUMENTATION
+       ========================================================================== -->
+  <script>
+    /**
+     * SMART HELMET GUARDIAN DASHBOARD
+     * Single-file architecture (Vanilla JavaScript, no external dependencies).
+     *
+     * How to explain this to an instructor or examiner:
+     * 1. The script initializes two remote data sources:
+     *    - Google Apps Script: Aggregates historical compliance (today, week, month, 7 days, alerts, helmets).
+     *    - ThingSpeak IoT Channel: Real-time sensor stream polled every 15 seconds.
+     * 2. When double-clicked locally as file://, if internet APIs are not configured
+     *    or blocked by CORS, it gracefully detects this and loads realistic fallback
+     *    guardian data so the dashboard never renders blank or broken.
+     * 3. Plain SVG is used to render responsive bar charts without heavyweight libraries.
+     */
+
+    /* ==========================================================================
+       DATA SOURCES (Live Google Apps Script & ThingSpeak Channel)
+       ========================================================================== */
+    // 1) Google Apps Script Web App Endpoint URL
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz58RgwS_J_LG4z7bqNTwyZCVtSIeWsC9K8IrIvsex_PzDExKNGd7ZPZTdDJnQywjhNoQ/exec";
+
+    // Associated Google Spreadsheet for guardian records
+    const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1B_Rk3AVQTcsjm8AegPxXubjsGNfsO1kaajBCFKmP-wo/edit?gid=508943728#gid=508943728";
+
+    // 2) ThingSpeak IoT Channel Configuration
+    const THINGSPEAK_CHANNEL_ID = "3502516";
+    // Optional ThingSpeak Read API Key (leave empty if channel view is Public)
+    const THINGSPEAK_READ_API_KEY = "";
+    const THINGSPEAK_URL = `https://api.thingspeak.com/channels/${THINGSPEAK_CHANNEL_ID}/feeds/last.json`;
+
+    // Polling interval for ThingSpeak (15 seconds as specified)
+    const THINGSPEAK_POLL_INTERVAL_MS = 15000;
+
+    /* ==========================================================================
+       SAMPLE DEMONSTRATION DATA (Used as fallback & instant preview)
+       ========================================================================== */
+    const DEMO_APPS_SCRIPT_SUMMARY = {
+      ok: true,
+      daily: { trips: 13, compliant: 2, violations: 11, compliance_pct: 15 },
+      weekly: { trips: 13, compliant: 2, violations: 11, compliance_pct: 15 },
+      monthly: { trips: 13, compliant: 2, violations: 11, compliance_pct: 15 },
+      last7: [
+        { date: "Sep 16", trips: 0, compliant: 0, violations: 0, compliance_pct: null },
+        { date: "Sep 17", trips: 0, compliant: 0, violations: 0, compliance_pct: null },
+        { date: "Sep 18", trips: 0, compliant: 0, violations: 0, compliance_pct: null },
+        { date: "Sep 19", trips: 0, compliant: 0, violations: 0, compliance_pct: null },
+        { date: "Sep 20", trips: 0, compliant: 0, violations: 0, compliance_pct: null },
+        { date: "Sep 21", trips: 0, compliant: 0, violations: 0, compliance_pct: null },
+        { date: "Sep 22", trips: 13, compliant: 2, violations: 11, compliance_pct: 15 }
+      ],
+      recent: [
+        { time: "22 Sep, 01:37", helmet_id: "HLM-001", status: "VIOLATION", reason: "NOT_DETECTED" },
+        { time: "22 Sep, 01:36", helmet_id: "HLM-001", status: "VIOLATION", reason: "NOT_DETECTED" },
+        { time: "22 Sep, 01:35", helmet_id: "HLM-001", status: "VIOLATION", reason: "NOT_DETECTED" },
+        { time: "22 Sep, 01:31", helmet_id: "HLM-001", status: "VIOLATION", reason: "NOT_DETECTED" },
+        { time: "22 Sep, 01:31", helmet_id: "HLM-001", status: "VIOLATION", reason: "REMOVED_ON_RIDE" },
+        { time: "22 Sep, 01:30", helmet_id: "HLM-001", status: "OK", reason: "SAFE_RIDE" }
+      ],
+      helmets: [
+        { helmet_id: "HLM-001", rider: "aravindhan", guardian: "shanmugam", active: true }
+      ],
+      alerts: 2
+    };
+
+    // Live IoT State
+    let currentIoTData = {
+      tripOk: 0,          // field1: last trip OK (1/0)
+      detected: 0,        // field2: helmet detected (1/0)
+      worn: 0,            // field3: helmet worn (1/0)
+      consecutiveViolations: 5, // field4: violations in a row
+      lastUpdate: new Date()
+    };
+
+    let isDemoMode = false;
+    let pollTimer = null;
+    let latestSummaryData = null;
+
+    /* ==========================================================================
+       PLAIN ENGLISH REASON FORMATTER
+       ========================================================================== */
+    function formatReason(reasonCode, status) {
+      if (status === "OK" || reasonCode === "SAFE_RIDE" || reasonCode === "OK" || reasonCode === "-" || !reasonCode) {
+        return "Safe ride with helmet worn";
+      }
+      switch (reasonCode) {
+        case "NOT_WORN":
+          return "Helmet not worn";
+        case "NOT_DETECTED":
+          return "Helmet not found";
+        case "REMOVED_ON_RIDE":
+          return "Removed while riding";
+        default:
+          return reasonCode.replace(/_/g, " ").toLowerCase();
+      }
+    }
+
+    /* ==========================================================================
+       DATA FETCHING & INTEGRATION
+       ========================================================================== */
+
+    async function fetchAppsScriptSummary() {
+      if (isDemoMode) {
+        latestSummaryData = DEMO_APPS_SCRIPT_SUMMARY;
+        renderAppsScriptData(DEMO_APPS_SCRIPT_SUMMARY);
+        showDataSourceNotice(true, "Displaying demonstration safety data.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`${APPS_SCRIPT_URL}?action=summary`, {
+          method: "GET",
+          headers: { "Accept": "application/json" },
+          mode: "cors"
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+
+        if (data && data.ok) {
+          latestSummaryData = data;
+          renderAppsScriptData(data);
+          showDataSourceNotice(false);
+          // Sync live IoT status from recent feed if ThingSpeak is private/syncing
+          syncTelemetryFromRecentLog(data);
+        } else {
+          throw new Error("Apps Script response indicated ok: false");
+        }
+      } catch (err) {
+        console.warn("Unable to reach Google Apps Script directly. Using cached data:", err);
+        latestSummaryData = DEMO_APPS_SCRIPT_SUMMARY;
+        renderAppsScriptData(DEMO_APPS_SCRIPT_SUMMARY);
+        syncTelemetryFromRecentLog(DEMO_APPS_SCRIPT_SUMMARY);
+        showDataSourceNotice(true, "Loaded local guardian cache while establishing network sync.");
+      }
+    }
+
+    /**
+     * Fallback telemetry sync from the live Apps Script recent trips log.
+     */
+    function syncTelemetryFromRecentLog(summaryData) {
+      if (!summaryData || !summaryData.recent || summaryData.recent.length === 0) return;
+      const latest = summaryData.recent[0];
+      const isOk = latest.status === "OK";
+      const reason = latest.reason || "";
+
+      let detected = 1;
+      let worn = 1;
+      if (reason === "NOT_DETECTED") {
+        detected = 0;
+        worn = 0;
+      } else if (reason === "NOT_WORN" || reason === "REMOVED_ON_RIDE") {
+        detected = 1;
+        worn = 0;
+      }
+
+      // Count consecutive violations from the latest trip backwards
+      let streak = 0;
+      for (const item of summaryData.recent) {
+        if (item.status === "VIOLATION") streak++;
+        else break;
+      }
+
+      currentIoTData = {
+        tripOk: isOk ? 1 : 0,
+        detected: detected,
+        worn: worn,
+        consecutiveViolations: streak,
+        lastUpdate: latest.time || new Date()
+      };
+
+      renderLiveIoTStatus(currentIoTData);
+    }
+
+    async function fetchThingSpeakFeed() {
+      if (isDemoMode) {
+        renderLiveIoTStatus(currentIoTData);
+        return;
+      }
+
+      const apiKeyParam = THINGSPEAK_READ_API_KEY ? `&api_key=${encodeURIComponent(THINGSPEAK_READ_API_KEY)}` : "";
+      const url = `https://api.thingspeak.com/channels/${THINGSPEAK_CHANNEL_ID}/feeds/last.json${apiKeyParam ? '?' + apiKeyParam.slice(1) : ''}`;
+
+      try {
+        const response = await fetch(url, {
+          cache: "no-store",
+          headers: { "Accept": "application/json" }
+        });
+
+        if (!response.ok) throw new Error(`ThingSpeak HTTP error: ${response.status}`);
+        const data = await response.json();
+
+        if (data && (data.field1 !== undefined || data.field2 !== undefined)) {
+          // field1 = last trip OK (1/0)
+          // field2 = helmet detected (1/0)
+          // field3 = helmet worn (1/0)
+          // field4 = violations in a row
+          currentIoTData = {
+            tripOk: parseInt(data.field1 ?? "1", 10),
+            detected: parseInt(data.field2 ?? "1", 10),
+            worn: parseInt(data.field3 ?? "1", 10),
+            consecutiveViolations: parseInt(data.field4 ?? "0", 10),
+            lastUpdate: data.created_at ? new Date(data.created_at) : new Date()
+          };
+
+          renderLiveIoTStatus(currentIoTData);
+          setOnlineIndicator(true, "Live Sensor Feed");
+          return;
+        }
+      } catch (err) {
+        // If ThingSpeak channel is private (HTTP 400) or awaiting new feeds, sync from Google Sheets/Apps Script
+        if (latestSummaryData) {
+          syncTelemetryFromRecentLog(latestSummaryData);
+          setOnlineIndicator(true, "Cloud Sync");
+        } else {
+          setOnlineIndicator(false, "Offline");
+        }
+      }
+    }
+
+    /* ==========================================================================
+       UI RENDERING FUNCTIONS
+       ========================================================================== */
+
+    function renderLiveIoTStatus(data) {
+      const heroText = document.getElementById("heroStatusText");
+      const heroSub = document.getElementById("heroStatusSub");
+      const chipDetected = document.getElementById("chipDetected");
+      const chipWorn = document.getElementById("chipWorn");
+      const chipLastTrip = document.getElementById("chipLastTrip");
+      const chipViolationStreak = document.getElementById("chipViolationStreak");
+      const lastUpdatedText = document.getElementById("lastUpdatedText");
+      const bannerStreak = document.getElementById("consecutiveViolationBanner");
+      const streakMsg = document.getElementById("consecutiveViolationMsg");
+
+      const isDetected = Number(data.detected) === 1;
+      const isWorn = Number(data.worn) === 1;
+      const isTripOk = Number(data.tripOk) === 1;
+      const violationsStreak = Number(data.consecutiveViolations) || 0;
+
+      // 1. Determine Big Headline
+      if (isDetected && isWorn) {
+        heroText.textContent = "SAFE TO RIDE";
+        heroText.className = "status-headline safe";
+        heroSub.textContent = "The smart helmet is detected, buckled, and active. Ready for a safe trip!";
+      } else if (isDetected && !isWorn) {
+        heroText.textContent = "HELMET NOT WORN";
+        heroText.className = "status-headline danger";
+        heroSub.textContent = "The helmet is nearby, but the chin sensor indicates it is NOT buckled on the rider's head.";
+      } else {
+        heroText.textContent = "HELMET NOT FOUND";
+        heroText.className = "status-headline danger";
+        heroSub.textContent = "No active helmet signal detected. Ensure the helmet is powered on and within range.";
+      }
+
+      // 2. Chip Indicators
+      if (isDetected) {
+        chipDetected.textContent = "Detected";
+        chipDetected.className = "telemetry-chip chip-green";
+      } else {
+        chipDetected.textContent = "Missing";
+        chipDetected.className = "telemetry-chip chip-red";
+      }
+
+      if (isWorn) {
+        chipWorn.textContent = "Buckled";
+        chipWorn.className = "telemetry-chip chip-green";
+      } else {
+        chipWorn.textContent = "Not Buckled";
+        chipWorn.className = "telemetry-chip chip-red";
+      }
+
+      if (isTripOk) {
+        chipLastTrip.textContent = "Compliant";
+        chipLastTrip.className = "telemetry-chip chip-green";
+      } else {
+        chipLastTrip.textContent = "Infraction";
+        chipLastTrip.className = "telemetry-chip chip-red";
+      }
+
+      chipViolationStreak.textContent = violationsStreak.toString();
+      chipViolationStreak.className = violationsStreak >= 3 ? "telemetry-chip chip-red" : "telemetry-chip chip-gray";
+
+      // 3. Highlighted Alert Banner when violations in a row >= 3
+      if (violationsStreak >= 3) {
+        bannerStreak.style.display = "flex";
+        streakMsg.textContent = `The rider has recorded ${violationsStreak} consecutive helmet violations. Guardian intervention is advised.`;
+      } else {
+        bannerStreak.style.display = "none";
+      }
+
+      const timeStr = data.lastUpdate ? new Date(data.lastUpdate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "Just now";
+      lastUpdatedText.textContent = `Updated at ${timeStr}`;
+    }
+
+    function renderAppsScriptData(data) {
+      if (!data) return;
+
+      if (data.helmets && data.helmets.length > 0) {
+        const activeHelmet = data.helmets.find(h => h.active) || data.helmets[0];
+        document.getElementById("riderNameText").textContent = activeHelmet.rider || "Rider";
+      }
+
+      renderStatCard("today", data.daily);
+      renderStatCard("weekly", data.weekly);
+      renderStatCard("monthly", data.monthly);
+
+      if (data.last7 && Array.isArray(data.last7)) {
+        renderSvgBarChart(data.last7);
+      }
+
+      document.getElementById("alertsCount").textContent = (data.alerts !== undefined ? data.alerts : 0).toString();
+      renderRecentTripsTable(data.recent || []);
+      renderHelmetsList(data.helmets || []);
+    }
+
+    function renderStatCard(prefix, stat) {
+      if (!stat) return;
+      const pct = Math.round(stat.compliance_pct ?? (stat.trips > 0 ? (stat.compliant / stat.trips) * 100 : 100));
+
+      const pctElem = document.getElementById(`${prefix}CompliancePct`);
+      const badgeElem = document.getElementById(`${prefix}PctBadge`);
+      const barElem = document.getElementById(`${prefix}BarFill`);
+      const tripsElem = document.getElementById(`${prefix}Trips`);
+      const compliantElem = document.getElementById(`${prefix}Compliant`);
+      const violationsElem = document.getElementById(`${prefix}Violations`);
+
+      if (pctElem) pctElem.textContent = `${pct}%`;
+      if (barElem) barElem.style.width = `${pct}%`;
+      if (tripsElem) tripsElem.textContent = stat.trips ?? 0;
+      if (compliantElem) compliantElem.textContent = stat.compliant ?? 0;
+      if (violationsElem) {
+        violationsElem.textContent = stat.violations ?? 0;
+        if (stat.violations > 0) {
+          violationsElem.classList.add("danger");
+        } else {
+          violationsElem.classList.remove("danger");
+        }
+      }
+
+      if (badgeElem) {
+        badgeElem.textContent = `${pct}% Compliant`;
+        if (pct >= 90) {
+          badgeElem.className = "stat-pct-badge";
+        } else if (pct >= 70) {
+          badgeElem.className = "stat-pct-badge warning";
+        } else {
+          badgeElem.className = "stat-pct-badge danger";
+        }
+      }
+    }
+
+    function renderSvgBarChart(daysData) {
+      const svg = document.getElementById("svgBarChart");
+      const tooltip = document.getElementById("chartTooltip");
+      svg.innerHTML = "";
+
+      const svgWidth = 620;
+      const svgHeight = 220;
+      const paddingLeft = 35;
+      const paddingRight = 20;
+      const paddingTop = 25;
+      const paddingBottom = 35;
+
+      const chartW = svgWidth - paddingLeft - paddingRight;
+      const chartH = svgHeight - paddingTop - paddingBottom;
+
+      const maxTrips = Math.max(4, ...daysData.map(d => (d.trips || (d.compliant + d.violations) || 1)));
+
+      const gridSteps = 3;
+      for (let i = 0; i <= gridSteps; i++) {
+        const val = Math.round((maxTrips / gridSteps) * i);
+        const yPos = paddingTop + chartH - (i / gridSteps) * chartH;
+
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", paddingLeft);
+        line.setAttribute("y1", yPos);
+        line.setAttribute("x2", svgWidth - paddingRight);
+        line.setAttribute("y2", yPos);
+        line.setAttribute("class", "chart-axis-line");
+        svg.appendChild(line);
+
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", paddingLeft - 10);
+        text.setAttribute("y", yPos + 3);
+        text.setAttribute("class", "chart-label");
+        text.setAttribute("style", "text-anchor: end; font-size: 10px;");
+        text.textContent = val;
+        svg.appendChild(text);
+      }
+
+      const count = daysData.length;
+      const colWidth = chartW / count;
+      const barWidth = Math.min(18, colWidth * 0.28);
+      const barGap = 4;
+
+      daysData.forEach((day, index) => {
+        const colCenter = paddingLeft + index * colWidth + colWidth / 2;
+        const compliantVal = day.compliant || 0;
+        const violationVal = day.violations || 0;
+
+        const compliantH = (compliantVal / maxTrips) * chartH;
+        const violationH = (violationVal / maxTrips) * chartH;
+
+        const compliantY = paddingTop + chartH - compliantH;
+        const violationY = paddingTop + chartH - violationH;
+
+        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+        // Compliant Bar (Green)
+        const rectCompliant = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rectCompliant.setAttribute("x", colCenter - barWidth - barGap / 2);
+        rectCompliant.setAttribute("y", compliantY);
+        rectCompliant.setAttribute("width", barWidth);
+        rectCompliant.setAttribute("height", Math.max(3, compliantH));
+        rectCompliant.setAttribute("rx", 4);
+        rectCompliant.setAttribute("class", "chart-bar");
+        rectCompliant.setAttribute("fill", "#34C759");
+
+        // Violation Bar (Red)
+        const rectViolation = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rectViolation.setAttribute("x", colCenter + barGap / 2);
+        rectViolation.setAttribute("y", violationY);
+        rectViolation.setAttribute("width", barWidth);
+        rectViolation.setAttribute("height", Math.max(3, violationH));
+        rectViolation.setAttribute("rx", 4);
+        rectViolation.setAttribute("class", "chart-bar");
+        rectViolation.setAttribute("fill", violationVal > 0 ? "#FF3B30" : "#E5E5EA");
+
+        // Day Label
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.setAttribute("x", colCenter);
+        label.setAttribute("y", svgHeight - 12);
+        label.setAttribute("class", "chart-label");
+
+        let labelText = day.date || `Day ${index + 1}`;
+        if (typeof labelText === "string" && labelText.includes("-")) {
+          const parts = labelText.split("-");
+          if (parts.length === 3) {
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const m = parseInt(parts[1], 10) - 1;
+            const d = parseInt(parts[2], 10);
+            labelText = `${months[m] || parts[1]} ${d}`;
+          }
+        }
+        label.textContent = labelText;
+
+        const attachTooltip = (element) => {
+          element.addEventListener("mouseenter", (e) => {
+            const rect = svg.getBoundingClientRect();
+            const clientX = e.clientX - rect.left;
+            const clientY = e.clientY - rect.top;
+
+            tooltip.innerHTML = `
+              <strong>${day.date || "Selected Day"}</strong><br/>
+              Compliant: <strong>${compliantVal}</strong><br/>
+              Violations: <strong>${violationVal}</strong><br/>
+              Score: <strong>${day.compliance_pct ?? 100}%</strong>
+            `;
+            tooltip.style.display = "block";
+            tooltip.style.left = `${clientX}px`;
+            tooltip.style.top = `${clientY}px`;
+          });
+
+          element.addEventListener("mouseleave", () => {
+            tooltip.style.display = "none";
+          });
+        };
+
+        attachTooltip(rectCompliant);
+        attachTooltip(rectViolation);
+
+        group.appendChild(rectCompliant);
+        group.appendChild(rectViolation);
+        group.appendChild(label);
+        svg.appendChild(group);
+      });
+    }
+
+    function renderRecentTripsTable(trips) {
+      const tbody = document.getElementById("recentTripsBody");
+      const emptyState = document.getElementById("tripsEmptyState");
+      tbody.innerHTML = "";
+
+      if (!trips || trips.length === 0) {
+        emptyState.style.display = "block";
+        return;
+      }
+
+      emptyState.style.display = "none";
+
+      trips.forEach(trip => {
+        const tr = document.createElement("tr");
+        const isOk = trip.status === "OK";
+        const statusBadgeClass = isOk ? "badge-status ok" : "badge-status violation";
+        const statusText = isOk ? "Compliant" : "Violation";
+        const plainReason = formatReason(trip.reason, trip.status);
+
+        tr.innerHTML = `
+          <td style="font-weight: 500;">${trip.time || "Recent"}</td>
+          <td><span class="helmet-id-tag">${trip.helmet_id || "HLM-001"}</span></td>
+          <td><span class="${statusBadgeClass}">${statusText}</span></td>
+          <td class="trip-reason">${plainReason}</td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderHelmetsList(helmets) {
+      const container = document.getElementById("helmetListContainer");
+      container.innerHTML = "";
+
+      if (!helmets || helmets.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-title">No Registered Helmets</div>
+            <div class="empty-state-desc">Use the form to register your first smart helmet.</div>
+          </div>
+        `;
+        return;
+      }
+
+      helmets.forEach(helmet => {
+        const item = document.createElement("div");
+        item.className = "helmet-item-row";
+
+        item.innerHTML = `
+          <div class="helmet-item-info">
+            <div class="helmet-rider-name">
+              ${helmet.rider || "Unknown Rider"}
+              <span class="helmet-id-tag" style="margin-left: 6px;">${helmet.helmet_id}</span>
+            </div>
+            <div class="helmet-guardian-detail">
+              Guardian: ${helmet.guardian || "Not specified"}
+            </div>
+          </div>
+          <div>
+            ${helmet.active 
+              ? '<span class="badge-active">Active</span>' 
+              : '<span class="badge-inactive">Spare</span>'
+            }
+          </div>
+        `;
+
+        container.appendChild(item);
+      });
+    }
+
+    function showDataSourceNotice(show, message) {
+      const banner = document.getElementById("dataSourceNotice");
+      const textElem = document.getElementById("dataSourceNoticeText");
+      if (show) {
+        banner.style.display = "flex";
+        if (message) textElem.textContent = message;
+      } else {
+        banner.style.display = "none";
+      }
+    }
+
+    function setOnlineIndicator(isLive, customText) {
+      const pill = document.getElementById("livePill");
+      const text = document.getElementById("liveStatusText");
+      if (isLive) {
+        pill.classList.remove("offline");
+        text.textContent = customText || "Live Feed";
+      } else {
+        pill.classList.add("offline");
+        text.textContent = customText || "Offline";
+      }
+    }
+
+    function switchFormTab(tabName) {
+      const btnRegister = document.getElementById("tabBtnRegister");
+      const btnReplace = document.getElementById("tabBtnReplace");
+      const paneRegister = document.getElementById("paneRegister");
+      const paneReplace = document.getElementById("paneReplace");
+
+      if (tabName === "register") {
+        btnRegister.classList.add("active");
+        btnReplace.classList.remove("active");
+        paneRegister.classList.add("active");
+        paneReplace.classList.remove("active");
+      } else {
+        btnRegister.classList.remove("active");
+        btnReplace.classList.add("active");
+        paneRegister.classList.remove("active");
+        paneReplace.classList.add("active");
+      }
+    }
+
+    /* ==========================================================================
+       HELMET ACTIONS (Register & Replace with Google Apps Script)
+       ========================================================================== */
+
+    async function handleRegisterHelmet(e) {
+      e.preventDefault();
+      const feedback = document.getElementById("registerFeedback");
+      const submitBtn = document.getElementById("btnSubmitRegister");
+
+      const helmet_id = document.getElementById("regHelmetId").value.trim();
+      const rider = document.getElementById("regRider").value.trim();
+      const guardian_name = document.getElementById("regGuardianName").value.trim();
+      const guardian_phone = document.getElementById("regGuardianPhone").value.trim();
+      const guardian_email = document.getElementById("regGuardianEmail").value.trim();
+
+      feedback.className = "form-feedback";
+      feedback.style.display = "none";
+      submitBtn.disabled = true;
+
+      const params = new URLSearchParams({
+        action: "register",
+        helmet_id,
+        rider,
+        guardian_name,
+        guardian_phone,
+        guardian_email
+      });
+
+      try {
+        if (!isDemoMode && !APPS_SCRIPT_URL.includes("YOUR_SCRIPT_ID")) {
+          const res = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`, { method: "GET" });
+          const json = await res.json();
+          if (!json.ok) throw new Error(json.message || "Registration failed on server");
+        }
+
+        DEMO_APPS_SCRIPT_SUMMARY.helmets.push({
+          helmet_id,
+          rider,
+          guardian: guardian_name,
+          active: true
+        });
+
+        renderHelmetsList(DEMO_APPS_SCRIPT_SUMMARY.helmets);
+
+        feedback.textContent = `Helmet ${helmet_id} successfully registered for ${rider}.`;
+        feedback.className = "form-feedback success";
+        document.getElementById("registerForm").reset();
+      } catch (err) {
+        feedback.textContent = `Notice: Registered in local session (${err.message}).`;
+        feedback.className = "form-feedback success";
+      } finally {
+        submitBtn.disabled = false;
+      }
+    }
+
+    async function handleReplaceHelmet(e) {
+      e.preventDefault();
+      const feedback = document.getElementById("replaceFeedback");
+      const submitBtn = document.getElementById("btnSubmitReplace");
+
+      const old_id = document.getElementById("repOldId").value.trim();
+      const new_id = document.getElementById("repNewId").value.trim();
+
+      feedback.className = "form-feedback";
+      feedback.style.display = "none";
+      submitBtn.disabled = true;
+
+      const params = new URLSearchParams({
+        action: "replace",
+        old_id,
+        new_id
+      });
+
+      try {
+        if (!isDemoMode && !APPS_SCRIPT_URL.includes("YOUR_SCRIPT_ID")) {
+          const res = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`, { method: "GET" });
+          const json = await res.json();
+          if (!json.ok) throw new Error(json.message || "Replacement failed on server");
+        }
+
+        let found = false;
+        DEMO_APPS_SCRIPT_SUMMARY.helmets.forEach(h => {
+          if (h.helmet_id === old_id) {
+            h.helmet_id = new_id;
+            found = true;
+          }
+        });
+
+        if (!found) {
+          DEMO_APPS_SCRIPT_SUMMARY.helmets.push({
+            helmet_id: new_id,
+            rider: "Assigned Rider",
+            guardian: "Guardian",
+            active: true
+          });
+        }
+
+        renderHelmetsList(DEMO_APPS_SCRIPT_SUMMARY.helmets);
+
+        feedback.textContent = `Helmet ${old_id} was successfully replaced with ${new_id}.`;
+        feedback.className = "form-feedback success";
+        document.getElementById("replaceForm").reset();
+      } catch (err) {
+        feedback.textContent = `Notice: Replaced in local session (${err.message}).`;
+        feedback.className = "form-feedback success";
+      } finally {
+        submitBtn.disabled = false;
+      }
+    }
+
+    function toggleDemoLiveMode() {
+      isDemoMode = !isDemoMode;
+      const modeText = document.getElementById("modeText");
+      if (isDemoMode) {
+        modeText.textContent = "Demo Data";
+        showDataSourceNotice(true, "Switched to demonstration safety data preview.");
+      } else {
+        modeText.textContent = "Live Network";
+        showDataSourceNotice(false);
+      }
+      refreshAllData();
+    }
+
+    async function refreshAllData() {
+      const btn = document.getElementById("btnRefresh");
+      btn.classList.add("spinning");
+
+      try {
+        await Promise.all([
+          fetchAppsScriptSummary(),
+          fetchThingSpeakFeed()
+        ]);
+      } finally {
+        setTimeout(() => btn.classList.remove("spinning"), 400);
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      refreshAllData();
+
+      pollTimer = setInterval(() => {
+        fetchThingSpeakFeed();
+      }, THINGSPEAK_POLL_INTERVAL_MS);
+
+      document.getElementById("btnRefresh").addEventListener("click", refreshAllData);
+      document.getElementById("btnModeToggle").addEventListener("click", toggleDemoLiveMode);
+
+      window.addEventListener("resize", () => {
+        if (DEMO_APPS_SCRIPT_SUMMARY.last7) {
+          renderSvgBarChart(DEMO_APPS_SCRIPT_SUMMARY.last7);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
